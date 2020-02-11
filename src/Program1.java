@@ -27,7 +27,10 @@ public class Program1 extends AbstractProgram1 {
     @Override
     public boolean isStableMatching(Matching marriage) {
         //last index reserved for unassigned employees
-        ArrayList<ArrayList<Integer>> location = new ArrayList<ArrayList<Integer>>(marriage.getLocationCount() + 1);
+        ArrayList<ArrayList<Integer>> location = new ArrayList<>();
+        for (int i = 0; i <= marriage.getLocationCount(); i++) {
+            location.add(new ArrayList<Integer>());
+        }
         for (int i = 0; i < marriage.getEmployeeCount(); i++) {
             int employee_location = marriage.getEmployeeMatching().get(i);
             if (employee_location < 0) {
@@ -40,7 +43,7 @@ public class Program1 extends AbstractProgram1 {
         for (int i = 0; i < marriage.getLocationCount(); i++) {
             for (int assigned_employee : location.get(i)) {
                 for (int unassigned_employee : location.get(location.size() - 1)) {
-                    if (marriage.getEmployeePreference().get(i).indexOf(assigned_employee) > marriage.getEmployeePreference().get(i).indexOf(unassigned_employee)) {
+                    if (marriage.getLocationPreference().get(i).indexOf(assigned_employee) > marriage.getLocationPreference().get(i).indexOf(unassigned_employee)) {
                         return false;
                     }
                 }
