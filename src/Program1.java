@@ -26,45 +26,6 @@ public class Program1 extends AbstractProgram1 {
      */
     @Override
     public boolean isStableMatching(Matching marriage) {
-        /*//last index reserved for unassigned employees
-        ArrayList<ArrayList<Integer>> location = new ArrayList<>();
-        for (int i = 0; i <= marriage.getLocationCount(); i++) {
-            location.add(new ArrayList<Integer>());
-        }
-        for (int i = 0; i < marriage.getEmployeeCount(); i++) {
-            int employee_location = marriage.getEmployeeMatching().get(i);
-            if (employee_location < 0) {
-                employee_location = marriage.getLocationCount();
-            }
-            location.get(employee_location).add(i);
-        }
-
-        //Instability type 1 : involves unassigned employees
-        for (int i = 0; i < marriage.getLocationCount(); i++) {
-            for (int assigned_employee : location.get(i)) {
-                for (int unassigned_employee : location.get(location.size() - 1)) {
-                    if (marriage.getLocationPreference().get(i).indexOf(assigned_employee) > marriage.getLocationPreference().get(i).indexOf(unassigned_employee)) {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        //Instability type 2
-        for (int i = 0; i < marriage.getLocationCount() - 1; i++) {
-            for (int employee_here : location.get(i)) {
-                for (int j = i + 1; j < marriage.getLocationCount(); j++) {
-                    for(int employee_there : location.get(j)) {
-                        if (marriage.getLocationPreference().get(i).indexOf(employee_here) > marriage.getLocationPreference().get(i).indexOf(employee_there)) {
-                            if (marriage.getEmployeePreference().get(j).indexOf(j) > marriage.getEmployeePreference().get(j).indexOf(i)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
-
         int current_location;
         int comparing_location;
 
@@ -92,7 +53,6 @@ public class Program1 extends AbstractProgram1 {
                 }
             }
         }
-
         return true;
     }
 
@@ -105,8 +65,35 @@ public class Program1 extends AbstractProgram1 {
      */
     @Override
     public Matching stableMarriageGaleShapley_employeeoptimal(Matching marriage) {
-        /* TODO implement this function */
-        return null; /* TODO remove this line */
+        ArrayList<Integer> matching_list = new ArrayList<>();
+        int[] employee_preference_index = new int[marriage.getEmployeeCount()];
+        int[] location_employee_count = new int[marriage.getLocationCount()];
+        int available_slots = marriage.totalLocationSlots();
+
+        for (int i = 0; i < marriage.getEmployeeCount(); i++) {
+            matching_list.add(-1);
+        }
+
+        while (available_slots > 0) {
+            int current_employee = matching_list.indexOf(-1);
+            do {
+                int prospective_location = marriage.getEmployeePreference().get(current_employee).get(employee_preference_index[current_employee]++);
+                if (location_employee_count[prospective_location] < marriage.getLocationSlots().get(prospective_location)) {
+                    matching_list.set(current_employee, prospective_location);
+                    location_employee_count[prospective_location]++;
+                    available_slots--;
+                }
+                else {
+                    int worst_employee = findWorstEmployee(prospective_location, marriage.getLocationPreference().get(prospective_location), matching_list);
+                    if (marriage.getLocationPreference().get(prospective_location).indexOf(current_employee) < marriage.getLocationPreference().get(prospective_location).indexOf(worst_employee)) {
+                        matching_list.set(current_employee, prospective_location);
+                        matching_list.set(worst_employee, -1);
+                    }
+                }
+            } while (matching_list.get(current_employee) < 0);
+        }
+
+        return new Matching(marriage, matching_list);
     }
 
     /**
@@ -117,7 +104,64 @@ public class Program1 extends AbstractProgram1 {
      */
     @Override
     public Matching stableMarriageGaleShapley_locationoptimal(Matching marriage) {
-        /* TODO implement this function */
-        return null; /* TODO remove this line */
+        ArrayList<Integer> matching_list = new ArrayList<>();
+        ArrayList<Integer> unfilled_locations = new ArrayList<>();
+        int[] location_preference_index = new int[marriage.getLocationCount()];
+        int[] location_employee_count = new int[marriage.getLocationCount()];
+
+        for (int i = 0; i < marriage.getEmployeeCount(); i++) {
+            matching_list.add(-1);
+        }
+
+        for (int i = 0; i < marriage.getLocationCount(); i++) {
+            unfilled_locations.add(i);
+        }
+
+        while (!unfilled_locations.isEmpty()) {
+            int current_location = unfilled_locations.get(0);
+
+            do {
+                int prospective_employee = marriage.getLocationPreference().get(current_location).get(location_preference_index[current_location]++);
+                int comparing_location = matching_list.get(prospective_employee);
+                if (comparing_location >= 0) {
+                    if (marriage.getEmployeePreference().get(prospective_employee).indexOf(current_location) < marriage.getEmployeePreference().get(prospective_employee).indexOf(comparing_location)) {
+                        matching_list.set(prospective_employee, current_location);
+                        location_employee_count[current_location]++;
+                        if (location_employee_count[current_location] >= marriage.getLocationSlots().get(current_location)) {
+                            unfilled_locations.remove(0);
+                        }
+                        location_employee_count[comparing_location]--;
+                        if (unfilled_locations.indexOf(comparing_location) < 0) {
+                            unfilled_locations.add(comparing_location);
+                        }
+                    }
+                }
+                else {
+                    matching_list.set(prospective_employee, current_location);
+                    location_employee_count[current_location]++;
+                    if (location_employee_count[current_location] >= marriage.getLocationSlots().get(current_location)) {
+                        unfilled_locations.remove(0);
+                    }
+                }
+            } while (unfilled_locations.get(0) == current_location);
+        }
+        return new Matching(marriage, matching_list);
+    }
+
+    public int findWorstEmployee(int location, ArrayList<Integer> preference_list, ArrayList<Integer> matching_list) {
+        int worst_employee = -1;
+        for (int i = 0; i < matching_list.size(); i++) {
+            if (matching_list.get(i) == location) {
+                if (worst_employee >= 0) {
+                    if (preference_list.indexOf(i) > preference_list.indexOf(worst_employee)) {
+                        worst_employee = i;
+                    }
+                }
+                else {
+                    worst_employee = i;
+                }
+            }
+        }
+        return worst_employee;
     }
 }
