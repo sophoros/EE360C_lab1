@@ -26,7 +26,7 @@ public class Program1 extends AbstractProgram1 {
      */
     @Override
     public boolean isStableMatching(Matching marriage) {
-        //last index reserved for unassigned employees
+        /*//last index reserved for unassigned employees
         ArrayList<ArrayList<Integer>> location = new ArrayList<>();
         for (int i = 0; i <= marriage.getLocationCount(); i++) {
             location.add(new ArrayList<Integer>());
@@ -57,6 +57,34 @@ public class Program1 extends AbstractProgram1 {
                     for(int employee_there : location.get(j)) {
                         if (marriage.getLocationPreference().get(i).indexOf(employee_here) > marriage.getLocationPreference().get(i).indexOf(employee_there)) {
                             if (marriage.getEmployeePreference().get(j).indexOf(j) > marriage.getEmployeePreference().get(j).indexOf(i)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }*/
+
+        int current_location;
+        int comparing_location;
+
+        for (int i = 0; i < marriage.getEmployeeCount() - 1; i++) {
+            current_location = marriage.getEmployeeMatching().get(i);
+            if (current_location >= 0) {
+                for (int j = i + 1; j < marriage.getEmployeeCount(); j++) {
+                    comparing_location = marriage.getEmployeeMatching().get(j);
+                    if (current_location != comparing_location) {
+                        //Instability type 2
+                        if (comparing_location >= 0) {
+                            if (marriage.getLocationPreference().get(current_location).indexOf(i) > marriage.getLocationPreference().get(current_location).indexOf(j)) {
+                                if (marriage.getEmployeePreference().get(j).indexOf(comparing_location) > marriage.getEmployeePreference().get(j).indexOf(current_location)) {
+                                    return false;
+                                }
+                            }
+                        }
+                        //Instability type 1
+                        else {
+                            if (marriage.getLocationPreference().get(current_location).indexOf(i) > marriage.getLocationPreference().get(current_location).indexOf(j)) {
                                 return false;
                             }
                         }
