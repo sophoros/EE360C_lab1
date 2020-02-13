@@ -67,8 +67,11 @@ public class Program1 extends AbstractProgram1 {
     @Override
     public Matching stableMarriageGaleShapley_employeeoptimal(Matching marriage) {
         ArrayList<Integer> matching_list = new ArrayList<>();
+        //contains employees that are unassigned and did not ask all locations
         Queue<Integer> available_employees  = new LinkedList<>();
+        //stores the index of each preference list for each employeee
         int[] employee_preference_index = new int[marriage.getEmployeeCount()];
+        //stores amount of employees assigned to a location
         int[] location_employee_count = new int[marriage.getLocationCount()];
 
         for (int i = 0; i < marriage.getEmployeeCount(); i++) {
@@ -83,11 +86,13 @@ public class Program1 extends AbstractProgram1 {
             int current_employee = available_employees.peek();
             int prospective_location = marriage.getEmployeePreference().get(current_employee).get(employee_preference_index[current_employee]++);
 
+            //case: store is not full
             if (location_employee_count[prospective_location] < marriage.getLocationSlots().get(prospective_location)) {
                 matching_list.set(current_employee, prospective_location);
                 location_employee_count[prospective_location]++;
 
             }
+            //case: store is full and only option is to swap
             else {
                 int worst_employee = findWorstEmployee(prospective_location, marriage.getLocationPreference().get(prospective_location), matching_list);
                 if (marriage.getLocationPreference().get(prospective_location).indexOf(current_employee) < marriage.getLocationPreference().get(prospective_location).indexOf(worst_employee)) {
@@ -98,6 +103,7 @@ public class Program1 extends AbstractProgram1 {
                     }
                 }
             }
+            //remove employee from queue if assigned or maxed
             if (employee_preference_index[current_employee] >= marriage.getLocationCount() || matching_list.get(current_employee) >= 0) {
                 available_employees.remove();
             }
@@ -115,7 +121,9 @@ public class Program1 extends AbstractProgram1 {
     @Override
     public Matching stableMarriageGaleShapley_locationoptimal(Matching marriage) {
         ArrayList<Integer> matching_list = new ArrayList<>();
+        //stores locations with availible slots
         Queue<Integer> unfilled_locations = new LinkedList<>();
+        //contains index of every preference list for every location
         int[] location_preference_index = new int[marriage.getLocationCount()];
         int[] location_employee_count = new int[marriage.getLocationCount()];
 
@@ -130,9 +138,12 @@ public class Program1 extends AbstractProgram1 {
         while (!unfilled_locations.isEmpty()) {
             int current_location = unfilled_locations.peek();
 
+            //apply for employees until full
             do {
                 int prospective_employee = marriage.getLocationPreference().get(current_location).get(location_preference_index[current_location]++);
                 int comparing_location = matching_list.get(prospective_employee);
+
+                //case: employee is assigned to another store
                 if (comparing_location >= 0) {
                     if (marriage.getEmployeePreference().get(prospective_employee).indexOf(current_location) < marriage.getEmployeePreference().get(prospective_employee).indexOf(comparing_location)) {
                         matching_list.set(prospective_employee, current_location);
@@ -146,6 +157,7 @@ public class Program1 extends AbstractProgram1 {
                         }
                     }
                 }
+                //case: employee is unassigned
                 else {
                     matching_list.set(prospective_employee, current_location);
                     location_employee_count[current_location]++;
@@ -158,6 +170,7 @@ public class Program1 extends AbstractProgram1 {
         return new Matching(marriage, matching_list);
     }
 
+    //returns the least preferred employee assigned to a particular store
     public int findWorstEmployee(int location, ArrayList<Integer> preference_list, ArrayList<Integer> matching_list) {
         int worst_employee = -1;
         for (int i = 0; i < matching_list.size(); i++) {
