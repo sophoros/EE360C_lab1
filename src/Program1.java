@@ -6,6 +6,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Your solution goes in this class.
@@ -66,31 +67,40 @@ public class Program1 extends AbstractProgram1 {
     @Override
     public Matching stableMarriageGaleShapley_employeeoptimal(Matching marriage) {
         ArrayList<Integer> matching_list = new ArrayList<>();
+        Queue<Integer> available_employees  = new LinkedList<>();
         int[] employee_preference_index = new int[marriage.getEmployeeCount()];
         int[] location_employee_count = new int[marriage.getLocationCount()];
-        int available_slots = marriage.totalLocationSlots();
 
+        for (int i = 0; i < marriage.getEmployeeCount(); i++) {
+            available_employees.add(i);
+        }
+        
         for (int i = 0; i < marriage.getEmployeeCount(); i++) {
             matching_list.add(-1);
         }
 
-        while (available_slots > 0) {
-            int current_employee = matching_list.indexOf(-1);
-            do {
-                int prospective_location = marriage.getEmployeePreference().get(current_employee).get(employee_preference_index[current_employee]++);
-                if (location_employee_count[prospective_location] < marriage.getLocationSlots().get(prospective_location)) {
+        while (!available_employees.isEmpty()) {
+            int current_employee = available_employees.peek();
+            int prospective_location = marriage.getEmployeePreference().get(current_employee).get(employee_preference_index[current_employee]++);
+
+            if (location_employee_count[prospective_location] < marriage.getLocationSlots().get(prospective_location)) {
+                matching_list.set(current_employee, prospective_location);
+                location_employee_count[prospective_location]++;
+
+            }
+            else {
+                int worst_employee = findWorstEmployee(prospective_location, marriage.getLocationPreference().get(prospective_location), matching_list);
+                if (marriage.getLocationPreference().get(prospective_location).indexOf(current_employee) < marriage.getLocationPreference().get(prospective_location).indexOf(worst_employee)) {
                     matching_list.set(current_employee, prospective_location);
-                    location_employee_count[prospective_location]++;
-                    available_slots--;
-                }
-                else {
-                    int worst_employee = findWorstEmployee(prospective_location, marriage.getLocationPreference().get(prospective_location), matching_list);
-                    if (marriage.getLocationPreference().get(prospective_location).indexOf(current_employee) < marriage.getLocationPreference().get(prospective_location).indexOf(worst_employee)) {
-                        matching_list.set(current_employee, prospective_location);
-                        matching_list.set(worst_employee, -1);
+                    matching_list.set(worst_employee, -1);
+                    if (employee_preference_index[worst_employee] < marriage.getLocationCount()) {
+                        available_employees.add(worst_employee);
                     }
                 }
-            } while (matching_list.get(current_employee) < 0);
+            }
+            if (employee_preference_index[current_employee] >= marriage.getLocationCount() || matching_list.get(current_employee) >= 0) {
+                available_employees.remove();
+            }
         }
 
         return new Matching(marriage, matching_list);
@@ -105,7 +115,7 @@ public class Program1 extends AbstractProgram1 {
     @Override
     public Matching stableMarriageGaleShapley_locationoptimal(Matching marriage) {
         ArrayList<Integer> matching_list = new ArrayList<>();
-        ArrayList<Integer> unfilled_locations = new ArrayList<>();
+        Queue<Integer> unfilled_locations = new LinkedList<>();
         int[] location_preference_index = new int[marriage.getLocationCount()];
         int[] location_employee_count = new int[marriage.getLocationCount()];
 
@@ -118,7 +128,7 @@ public class Program1 extends AbstractProgram1 {
         }
 
         while (!unfilled_locations.isEmpty()) {
-            int current_location = unfilled_locations.get(0);
+            int current_location = unfilled_locations.peek();
 
             do {
                 int prospective_employee = marriage.getLocationPreference().get(current_location).get(location_preference_index[current_location]++);
@@ -128,10 +138,10 @@ public class Program1 extends AbstractProgram1 {
                         matching_list.set(prospective_employee, current_location);
                         location_employee_count[current_location]++;
                         if (location_employee_count[current_location] >= marriage.getLocationSlots().get(current_location)) {
-                            unfilled_locations.remove(0);
+                            unfilled_locations.remove();
                         }
                         location_employee_count[comparing_location]--;
-                        if (unfilled_locations.indexOf(comparing_location) < 0) {
+                        if (!unfilled_locations.contains(comparing_location)) {
                             unfilled_locations.add(comparing_location);
                         }
                     }
@@ -140,10 +150,10 @@ public class Program1 extends AbstractProgram1 {
                     matching_list.set(prospective_employee, current_location);
                     location_employee_count[current_location]++;
                     if (location_employee_count[current_location] >= marriage.getLocationSlots().get(current_location)) {
-                        unfilled_locations.remove(0);
+                        unfilled_locations.remove();
                     }
                 }
-            } while (unfilled_locations.get(0) == current_location);
+            } while (!unfilled_locations.isEmpty() && unfilled_locations.peek() == current_location);
         }
         return new Matching(marriage, matching_list);
     }
