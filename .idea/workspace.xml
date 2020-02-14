@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ac9846e2-e755-43a2-a3a6-860c9ae77b77" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Program1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Program1.java" afterDir="false" />
-    </list>
+    <list default="true" id="ac9846e2-e755-43a2-a3a6-860c9ae77b77" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -87,10 +84,10 @@
     </configuration>
     <list>
       <item itemvalue="Application.Driver" />
-      <item itemvalue="JUnit.testing.test1" />
-      <item itemvalue="JUnit.testing.testSwap" />
       <item itemvalue="JUnit.testing" />
       <item itemvalue="JUnit.testing.stableMarriageGaleShapley_employeeoptimal_Test_LG_160" />
+      <item itemvalue="JUnit.testing.test1" />
+      <item itemvalue="JUnit.testing.testSwap" />
     </list>
     <recent_temporary>
       <list>
