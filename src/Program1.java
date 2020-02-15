@@ -30,6 +30,9 @@ public class Program1 extends AbstractProgram1 {
         int current_location;
         int comparing_location;
 
+        if (marriage.getEmployeeMatching() == null || marriage.getLocationCount() == 0 || marriage.getEmployeeCount() == 0) {
+            return false;
+        }
         for (int i = 0; i < marriage.getEmployeeCount() - 1; i++) {
             current_location = marriage.getEmployeeMatching().get(i);
             if (current_location >= 0) {
